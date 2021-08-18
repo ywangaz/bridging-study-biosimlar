@@ -1,0 +1,47 @@
+---
+title: "simulation"
+author: "Yujia Wang"
+date: "7/11/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(tidyverse)
+library(knitr)
+library(Hmisc)
+library(grid)
+library(gridExtra)
+library(kableExtra)
+```
+
+```{r sim table 1, echo=FALSE}
+sim.results1 = read.csv('output/simulation 1.csv')
+suffixes = unique(sim.results1$CV)
+kdat = sim.results1 %>% filter((mu.T > 0.1) & (mu.T < 0.9)) %>% 
+  select(c(mu.T, n, CV, pwr.tost, pwr.pairwise)) %>%
+  pivot_wider(names_from = CV, values_from=c(pwr.tost, pwr.pairwise))
+names_to_order = map(suffixes, ~ names(kdat)[grep(paste0("_", .x), names(kdat))]) %>% unlist
+names_id = setdiff(names(kdat), names_to_order)
+kdat = kdat %>% select(names_id, names_to_order)
+
+kable(kdat, booktabs = T, align="c", digits = 3, row.names = F, 
+           col.names = c(names_id, rep(c('TOST', 'Pairwise'),4))) %>% kable_classic_2() %>%
+     add_header_above(c(" "=2, 'CV=0.1'=2, 'CV=0.2'=2, 'CV=0.3'=2, 'CV=0.4'=2)) 
+```
+
+```{r sim table 2}
+sim.results2 = read.csv('output/simulation 2.csv')
+suffixes = unique(sim.results2$mu.B)
+kdat = sim.results2 %>% filter((mu.T > 0.1) & (mu.T < 0.9)) %>% 
+  select(c(mu.T, n, mu.B, pwr.tost, pwr.pairwise)) %>%
+  pivot_wider(names_from = mu.B, values_from=c(pwr.tost, pwr.pairwise))
+names_to_order = map(suffixes, ~ names(kdat)[grep(paste0("_", .x), names(kdat))]) %>% unlist
+names_id = setdiff(names(kdat), names_to_order)
+kdat = kdat %>% select(names_id, names_to_order)
+
+kable(kdat, booktabs = T, align="c", digits = 3, row.names = F, 
+           col.names = c(names_id, rep(c('TOST', 'Pairwise'),2))) %>% kable_classic_2() %>%
+     add_header_above(c(" "=2, 'mu.B=0.395'=2, 'mu.B=0.630'=2)) 
+```
+
